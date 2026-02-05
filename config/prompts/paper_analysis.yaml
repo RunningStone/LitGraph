@@ -16,7 +16,7 @@ template: |
   ## Abstract
   {{ abstract }}
 
-  {% if full_text %}
+  {% if full_text is defined and full_text %}
   ## Full Text
   {{ full_text }}
   {% endif %}

@@ -8,7 +8,7 @@ template: |
   ## Seed Keywords
   {{ seed_keywords }}
 
-  {% if kg_context %}
+  {% if kg_context is defined and kg_context %}
   ## Knowledge Graph Context
   {{ kg_context }}
   {% endif %}
