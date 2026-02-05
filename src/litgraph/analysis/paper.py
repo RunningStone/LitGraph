@@ -144,11 +144,12 @@ def cleanup_pdf_text(text: str) -> str:
 
 @with_retry
 def _download_and_extract_pdf(pdf_url: str) -> str | None:
-    """Download PDF to temp file, extract text, delete PDF."""
+    """Download PDF to temp file, extract text, delete PDF. 30s timeout."""
     try:
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
             tmp_path = tmp.name
-            urllib.request.urlretrieve(pdf_url, tmp_path)
+            with urllib.request.urlopen(pdf_url, timeout=30) as resp:
+                tmp.write(resp.read())
 
         text = extract_pdf_text(tmp_path)
         text = cleanup_pdf_text(text)
