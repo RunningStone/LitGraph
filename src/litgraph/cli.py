@@ -298,23 +298,41 @@ def run(keywords, sources, max_results, year_from, min_citations, resume):
         "steps": {},
     }
 
-    # Step 1: Search
+    # Step 1: Keyword expansion (if KG exists)
+    search_keywords = list(keywords)
+    kg_dir = data_dir / "kg_store"
+    graphml_files = list(kg_dir.glob("*.graphml")) if kg_dir.exists() else []
+    if graphml_files:
+        click.echo("Step 1: Expanding keywords from KG...")
+        from litgraph.kg.direct import expand_keywords, load_graph
+        graph = load_graph(graphml_files[0])
+        expanded = expand_keywords(graph, search_keywords, max_hops=2, max_results=20)
+        new_kws = [kw for kw in expanded if kw not in search_keywords]
+        if new_kws:
+            search_keywords.extend(new_kws)
+            click.echo(f"  Expanded: +{len(new_kws)} keywords → {search_keywords}")
+        run_record["steps"]["expand"] = {"original": list(keywords), "expanded": new_kws}
+    else:
+        click.echo("Step 1: Keyword expansion — skipping (no KG yet)")
+        run_record["steps"]["expand"] = "skipped"
+
+    # Step 2: Search
     index_path = data_dir / "papers" / "index.json"
     if resume and index_path.exists():
-        click.echo("Step 1: Search — skipping (index.json exists)")
+        click.echo("Step 2: Search — skipping (index.json exists)")
         run_record["steps"]["search"] = "skipped"
     else:
-        click.echo("Step 1: Searching papers...")
+        click.echo("Step 2: Searching papers...")
         source_list = [s.strip() for s in sources.split(",")]
         all_papers = []
 
         if "arxiv" in source_list:
             from litgraph.search.arxiv import search_arxiv
-            all_papers.extend(search_arxiv(list(keywords), max_results=max_results))
+            all_papers.extend(search_arxiv(search_keywords, max_results=max_results))
 
         if "semantic" in source_list:
             from litgraph.search.semantic import search_semantic_scholar
-            all_papers.extend(search_semantic_scholar(list(keywords), max_results=max_results, year_from=year_from))
+            all_papers.extend(search_semantic_scholar(search_keywords, max_results=max_results, year_from=year_from))
 
         deduped = dedup_paper_list(all_papers)
         index_path.parent.mkdir(parents=True, exist_ok=True)
@@ -327,12 +345,16 @@ def run(keywords, sources, max_results, year_from, min_citations, resume):
     with open(index_path) as f:
         papers = json.load(f)
     filtered = filter_papers(papers, list(keywords), min_citations=min_citations)
+    # Write back index with relevance markers
+    with open(index_path, "w") as f:
+        json.dump(papers, f, indent=2, ensure_ascii=False)
     click.echo(f"  {len(filtered)} papers passed filter")
     run_record["steps"]["filter"] = {"passed": len(filtered)}
 
-    # Step 3: Analyze
+    # Step 3: Analyze — only filtered papers
     click.echo("Step 3: Analyzing papers...")
-    stats = analyze_batch(all_pending=True, data_dir=data_dir)
+    filtered_ids = [p.get("paper_id") or p.get("dedup_key") for p in filtered]
+    stats = analyze_batch(paper_ids=filtered_ids, data_dir=data_dir)
     click.echo(f"  Analyzed: {stats['analyzed']}, Skipped: {stats['skipped']}, Failed: {stats['failed']}")
     run_record["steps"]["analyze"] = stats
 

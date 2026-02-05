@@ -82,10 +82,26 @@ def get_rag(working_dir: str | Path | None = None):
     if working_dir is None:
         working_dir = str(settings.data_dir / "kg_store")
 
-    # Override entity types in prompts
+    # Override entity types and entity extraction prompt
     PROMPTS["DEFAULT_ENTITY_TYPES"] = [
         "Paper", "Concept", "Method", "Dataset", "Finding", "Task"
     ]
+
+    # Load custom entity extraction prompt from config
+    try:
+        entity_prompt_path = settings.prompts_dir / "entity_extraction.yaml"
+        if entity_prompt_path.exists():
+            import yaml
+            with open(entity_prompt_path) as f:
+                entity_data = yaml.safe_load(f)
+            # Prepend domain-specific guidance to nano-graphrag's prompt
+            domain_guidance = entity_data.get("system", "").strip()
+            if domain_guidance:
+                PROMPTS["entity_extraction"] = (
+                    domain_guidance + "\n\n" + PROMPTS["entity_extraction"]
+                )
+    except Exception as e:
+        logger.warning("Failed to load custom entity extraction prompt: %s", e)
 
     rag = GraphRAG(
         working_dir=str(working_dir),

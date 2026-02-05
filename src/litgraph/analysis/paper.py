@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
+import shutil
 import tempfile
 import urllib.request
 from datetime import datetime, timezone
@@ -40,6 +42,16 @@ def analyze_paper(paper: dict, data_dir: Path) -> Path | None:
 
     analysis_dir = data_dir / "analysis"
     analysis_dir.mkdir(parents=True, exist_ok=True)
+
+    # Check disk space (require at least 50 MB free)
+    try:
+        free_bytes = shutil.disk_usage(data_dir).free
+        if free_bytes < 50 * 1024 * 1024:
+            logger.error("Low disk space (%d MB free), skipping analysis of %s",
+                         free_bytes // (1024 * 1024), paper_id)
+            return None
+    except OSError:
+        pass  # If disk_usage fails, proceed anyway
     md_path = analysis_dir / f"{safe_id}.md"
 
     # Check existing analysis

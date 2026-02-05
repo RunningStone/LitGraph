@@ -10,6 +10,36 @@ import pytest
 
 
 @pytest.fixture
+def fixture_pdf(tmp_path):
+    """Create a small test PDF with pymupdf programmatically."""
+    import pymupdf
+
+    pdf_path = tmp_path / "test.pdf"
+    doc = pymupdf.open()
+
+    # Page 1
+    page = doc.new_page()
+    text_point = pymupdf.Point(72, 100)
+    page.insert_text(text_point, "This is the first page of the paper.")
+    text_point2 = pymupdf.Point(72, 120)
+    page.insert_text(text_point2, "It discusses founda-")
+
+    # Page 2
+    page2 = doc.new_page()
+    text_point3 = pymupdf.Point(72, 100)
+    page2.insert_text(text_point3, "tion models for single-cell analysis.")
+    text_point4 = pymupdf.Point(72, 120)
+    page2.insert_text(text_point4, "The results show improvement.")
+    # Page number
+    text_point5 = pymupdf.Point(300, 750)
+    page2.insert_text(text_point5, "2")
+
+    doc.save(str(pdf_path))
+    doc.close()
+    return pdf_path
+
+
+@pytest.fixture
 def fixture_papers():
     """3 hardcoded paper metadata dicts (no network needed)."""
     return [
