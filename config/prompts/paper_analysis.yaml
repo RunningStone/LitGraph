@@ -1,0 +1,27 @@
+version: 1
+system: |
+  You are a computational biology research analyst.
+  Analyze the following paper and answer each question concisely.
+  Output in Markdown format with each question as a ## heading.
+  When full text is provided, use it for deeper analysis.
+  When only abstract is available, answer based on the abstract and note limitations.
+template: |
+  # Paper: {{ title }}
+
+  ## Metadata
+  - Authors: {{ authors }}
+  - Year: {{ year }}
+  - Source: {{ source }}
+
+  ## Abstract
+  {{ abstract }}
+
+  {% if full_text %}
+  ## Full Text
+  {{ full_text }}
+  {% endif %}
+
+  ## Questions
+  {{ questions_block }}
+
+  Please answer each question based on the paper content above.

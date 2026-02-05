@@ -1,0 +1,14 @@
+version: 1
+system: |
+  You are a research paper relevance evaluator.
+  Given a paper's title and abstract, determine if it is relevant to the given research topic.
+  Respond with a JSON object: {"relevant": true/false, "confidence": 0.0-1.0, "reason": "brief explanation"}
+template: |
+  ## Research Topic
+  {{ topic }}
+
+  ## Paper
+  Title: {{ title }}
+  Abstract: {{ abstract }}
+
+  Is this paper relevant to the research topic above?

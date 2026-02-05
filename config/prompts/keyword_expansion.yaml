@@ -1,0 +1,17 @@
+version: 1
+system: |
+  You are a research keyword expansion assistant.
+  Given seed keywords and knowledge graph context, suggest additional relevant search terms.
+  Focus on synonyms, related concepts, and sub-topics.
+  Return a JSON list of strings.
+template: |
+  ## Seed Keywords
+  {{ seed_keywords }}
+
+  {% if kg_context %}
+  ## Knowledge Graph Context
+  {{ kg_context }}
+  {% endif %}
+
+  Suggest additional search keywords related to the seed keywords above.
+  Return as a JSON list of strings.

@@ -1,0 +1,14 @@
+version: 1
+questions:
+  - id: problem
+    text: "What problem does this paper address? What are the limitations of existing approaches?"
+  - id: method
+    text: "What is the core innovation of the proposed method/model?"
+  - id: data
+    text: "What datasets are used? What are the evaluation metrics?"
+  - id: results
+    text: "What are the key experimental results and comparisons with baselines?"
+  - id: limitations
+    text: "What are the limitations and future directions?"
+  - id: connection
+    text: "What are the potential connections to single-cell foundation models / spatial biology?"

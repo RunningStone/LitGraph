@@ -1,0 +1,32 @@
+node_types:
+  Paper:
+    required: [title, year, source]
+    optional: [doi, arxiv_id]
+  Concept:
+    required: [name]
+    optional: [aliases]
+  Method:
+    required: [name]
+    optional: [category]
+  Dataset:
+    required: [name]
+  Finding:
+    required: [description, paper_id]
+  Task:
+    required: [name]
+
+relation_types:
+  uses_method:    { from: Paper, to: Method }
+  studies_topic:  { from: Paper, to: Concept }
+  proposes:       { from: Paper, to: Method }
+  extends:        { from: Paper, to: Paper }
+  contradicts:    { from: Finding, to: Finding }
+  evaluated_on:   { from: Method, to: Dataset }
+  part_of:        { from: Concept, to: Concept }
+
+aliases:
+  "scRNA-seq": "single-cell RNA sequencing"
+  "scRNAseq": "single-cell RNA sequencing"
+  "sc-RNA-seq": "single-cell RNA sequencing"
+  "VAE": "variational autoencoder"
+  "GAN": "generative adversarial network"

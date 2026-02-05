@@ -1,0 +1,21 @@
+# Default configuration for LitGraph (non-sensitive defaults)
+
+search:
+  max_results: 50
+  year_from: 2023
+  sources:
+    - arxiv
+    - semantic
+
+filter:
+  min_citations: 5
+  use_llm_filter: false
+
+analysis:
+  max_pdf_pages: 50
+  pdf_download_timeout: 30
+
+kg:
+  max_async: 1
+  expand_max_hops: 2
+  expand_max_results: 20

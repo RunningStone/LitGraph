@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "litgraph"
+version = "0.1.0"
+description = "Literature analysis knowledge graph service"
+requires-python = ">=3.9"
+dependencies = [
+    "nano-graphrag",
+    "networkx",
+    "openai",
+    "sentence-transformers",
+    "paperscraper",
+    "semanticscholar",
+    "pymupdf",
+    "python-dotenv",
+    "pyyaml",
+    "jinja2",
+    "click",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-mock",
+]
+
+[project.scripts]
+litgraph = "litgraph.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/litgraph"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "live: tests that require external services (LLM, search APIs)",
+]

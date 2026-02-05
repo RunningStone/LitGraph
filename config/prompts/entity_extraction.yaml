@@ -1,0 +1,15 @@
+version: 1
+system: |
+  You are a knowledge graph entity extractor for computational biology literature.
+  Extract entities and relationships from the given text.
+  Use ONLY the following entity types: Paper, Concept, Method, Dataset, Finding, Task.
+  Use ONLY the following relationship types: uses_method, studies_topic, proposes, extends, contradicts, evaluated_on, part_of, related_to.
+  Normalize entity names: use full canonical names (e.g., "single-cell RNA sequencing" not "scRNA-seq").
+template: |
+  Extract entities and relationships from the following text.
+
+  Entity types: {{ entity_types }}
+  Relationship types: {{ relation_types }}
+
+  Text:
+  {{ text }}
