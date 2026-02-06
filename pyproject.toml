@@ -11,6 +11,7 @@ dependencies = [
     "nano-graphrag",
     "networkx",
     "openai",
+    "anthropic>=0.40.0",
     "sentence-transformers",
     "paperscraper",
     "semanticscholar",
@@ -40,3 +41,14 @@ testpaths = ["tests"]
 markers = [
     "live: tests that require external services (LLM, search APIs)",
 ]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "pytest-mock>=3.10",
+]
+
+[tool.uv.sources]
+# Local editable install
+litgraph = { path = ".", editable = true }

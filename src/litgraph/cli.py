@@ -411,7 +411,15 @@ def config_show():
     settings = get_settings()
     click.echo(f"Mode: {settings.mode}")
     click.echo(f"Data dir: {settings.data_dir}")
-    click.echo(f"LLM base URL: {settings.llm.base_url}")
+
+    if settings.mode == "lite":
+        click.echo(f"Ollama URL: {settings.llm.base_url}")
+    else:
+        # Pro mode - show auth type
+        auth_type = "OAuth token" if settings.llm.is_oauth_token else "API key"
+        key_prefix = settings.llm.api_key[:15] + "..." if settings.llm.api_key else "(not set)"
+        click.echo(f"Auth: {auth_type} ({key_prefix})")
+
     click.echo(f"Best model: {settings.llm.best_model}")
     click.echo(f"Cheap model: {settings.llm.cheap_model}")
     click.echo(f"Embedding model: {settings.embedding_model}")
@@ -427,8 +435,13 @@ def config_validate():
     settings = get_settings()
     errors = []
 
-    # Test LLM endpoint
-    click.echo(f"Testing LLM endpoint ({settings.llm.base_url})...")
+    # Test LLM
+    if settings.mode == "lite":
+        click.echo(f"Testing Ollama ({settings.llm.base_url})...")
+    else:
+        auth_type = "OAuth token" if settings.llm.is_oauth_token else "API key"
+        click.echo(f"Testing Anthropic API ({auth_type})...")
+
     try:
         from litgraph.llm.client import complete, reset_client
         reset_client()

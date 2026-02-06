@@ -10,12 +10,26 @@ import yaml
 from dotenv import load_dotenv
 
 
+# OAuth token prefix for Anthropic subscription tokens
+ANTHROPIC_OAUTH_PREFIX = "sk-ant-oat"
+
+
 @dataclass
 class LLMConfig:
-    base_url: str = "http://localhost:3456/v1"
-    api_key: str = "not-needed"
-    best_model: str = "claude-sonnet-4"
-    cheap_model: str = "claude-haiku-4"
+    """LLM configuration for Pro mode (Anthropic) or Lite mode (Ollama)."""
+
+    # For Pro mode: Anthropic API key or OAuth token
+    api_key: str = ""
+    best_model: str = "claude-sonnet-4-20250514"
+    cheap_model: str = "claude-haiku-4-20250414"
+
+    # For Lite mode: Ollama base URL
+    base_url: str = "http://localhost:11434/v1"
+
+    @property
+    def is_oauth_token(self) -> bool:
+        """Check if the API key is an OAuth subscription token."""
+        return self.api_key.startswith(ANTHROPIC_OAUTH_PREFIX)
 
 
 @dataclass
@@ -91,16 +105,22 @@ def get_settings(project_root: Path | None = None, force_reload: bool = False) -
         ollama_model = os.environ.get("LITGRAPH_OLLAMA_MODEL", "qwen2.5:7b")
         llm = LLMConfig(
             base_url=os.environ.get("LITGRAPH_OLLAMA_BASE_URL", "http://localhost:11434/v1"),
-            api_key=os.environ.get("LITGRAPH_PROXY_API_KEY", "not-needed"),
+            api_key="ollama",  # Ollama doesn't need a real key
             best_model=ollama_model,
             cheap_model=ollama_model,
         )
     else:
+        # Pro mode: use Anthropic API directly
+        # Priority: ANTHROPIC_OAUTH_TOKEN > LITGRAPH_ANTHROPIC_API_KEY > ANTHROPIC_API_KEY
+        api_key = (
+            os.environ.get("ANTHROPIC_OAUTH_TOKEN", "").strip()
+            or os.environ.get("LITGRAPH_ANTHROPIC_API_KEY", "").strip()
+            or os.environ.get("ANTHROPIC_API_KEY", "").strip()
+        )
         llm = LLMConfig(
-            base_url=os.environ.get("LITGRAPH_PROXY_BASE_URL", "http://localhost:3456/v1"),
-            api_key=os.environ.get("LITGRAPH_PROXY_API_KEY", "not-needed"),
-            best_model=os.environ.get("LITGRAPH_PRO_BEST_MODEL", "claude-sonnet-4"),
-            cheap_model=os.environ.get("LITGRAPH_PRO_CHEAP_MODEL", "claude-haiku-4"),
+            api_key=api_key,
+            best_model=os.environ.get("LITGRAPH_PRO_BEST_MODEL", "claude-sonnet-4-20250514"),
+            cheap_model=os.environ.get("LITGRAPH_PRO_CHEAP_MODEL", "claude-haiku-4-20250414"),
         )
 
     retry = RetryConfig(
